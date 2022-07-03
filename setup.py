@@ -9,7 +9,7 @@ setup(
   long_description_content_type = 'text/markdown',
   author = 'Nicolai M. T. Lassen',
   author_email = 'mail@nmtl.dk',
-  url = 'https://github.com/lucidrains/vit-pytorch',
+  url = 'https://github.com/NicolaiLassen/fno-pytorch',
   keywords = [
     'artificial intelligence',
     'attention mechanism',
