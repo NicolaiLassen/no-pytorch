@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
 setup(
-  name = 'fno-pytorch',
+  name = 'no-pytorch',
   packages = find_packages(exclude=['examples']),
   version = '0.0.1',
   license='MIT',
-  description = 'Fourier Neural Operator (fno) - Pytorch',
+  description = 'Neural Operator (no) - Pytorch',
   long_description_content_type = 'text/markdown',
   author = 'Nicolai M. T. Lassen',
   author_email = 'mail@nmtl.dk',
-  url = 'https://github.com/NicolaiLassen/fno-pytorch',
+  url = 'https://github.com/NicolaiLassen/no-pytorch',
   keywords = [
     'artificial intelligence',
     'attention mechanism',

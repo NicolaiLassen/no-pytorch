@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-$ pip install fno-pytorch
+$ pip install no-pytorch
 ```
 
 ## Neural Operator - Pytorch
@@ -12,7 +12,7 @@ $ pip install fno-pytorch
 
 ```python
 import torch
-from fno_pytorch import SpectralConv1d
+from no_pytorch import SpectralConv1d
 
 spec_1d = SpectralConv1d(
             in_channels = 10,
