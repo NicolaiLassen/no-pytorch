@@ -44,6 +44,7 @@ class FourierTransformer1d(nn.Module):
                 heads=4,
                 attention_depth=4,
                 spectral_depth=1,
+                spectral_dim=20,
                 head_pos=RoPE,
                 attn_norm=False,
                 xavier_init=0.01,
@@ -51,7 +52,11 @@ class FourierTransformer1d(nn.Module):
         ):
         super(FourierTransformer1d, self).__init__()
         
+        self.project = nn.Linear(in_channels, spectral_dim)
+        
         attention_layer = FourierAttention(
+            in_channels=spectral_dim,
+            out_channels=out_channels,
             heads=heads,
             dim_head=dim_head,
             head_pos=head_pos(dim_head),
@@ -64,6 +69,8 @@ class FourierTransformer1d(nn.Module):
         self.regressor = FNO1d()
 
     def forward(self, x: torch.Tensor, mask=None):
+        
+        x = self.project(x)
         
         for attention in self.attention_layers:
             x = attention(x, mask=mask)

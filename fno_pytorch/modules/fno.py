@@ -57,7 +57,7 @@ class FNO1d(nn.Module):
         
         # field and bound grid
         if grid:
-            grid = self.get_grid(x.shape, x.device)
+            grid = get_1d_grid(x.shape, x.device)
             x = torch.cat((x, grid), dim=-1)
             x = self.project(x)
         
@@ -122,7 +122,7 @@ class FNO2d(nn.Module):
              
         # field and bound grid
         if grid:
-            grid = self.get_grid(x.shape, x.device) if grid is None else grid
+            grid = get_2d_grid(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=-1)
             x = self.project(x)
         
