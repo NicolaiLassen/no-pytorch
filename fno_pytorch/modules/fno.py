@@ -1,3 +1,12 @@
+'''
+    @author: Zongyi Li
+    1D Fourier layer. It does FFT, linear transform, and Inverse FFT.
+    https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_1d.py
+    
+    2D Fourier layer. It does FFT, linear transform, and Inverse FFT.
+    https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_2d.py
+'''
+
 import torch
 from einops import rearrange
 import torch.nn as nn
@@ -13,7 +22,6 @@ class FNO1d(nn.Module):
                  dim_feedforward=128,
                  activation=nn.SiLU
         ):
-        
         super(FNO1d, self).__init__()
 
         self.project = nn.Linear(in_channels + 1, freq_dim)
@@ -73,7 +81,6 @@ class FNO2d(nn.Module):
                  dim_feedforward=128,
                  activation=nn.SiLU
         ):
-        
         super(FNO2d, self).__init__()
 
         self.project = nn.Linear(in_channels + 2, freq_dim)
