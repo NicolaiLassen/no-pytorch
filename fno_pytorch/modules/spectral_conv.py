@@ -2,6 +2,9 @@
     @author: Zongyi Li
     1D Fourier layer. It does FFT, linear transform, and Inverse FFT.
     https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_1d.py
+    
+    2D Fourier layer. It does FFT, linear transform, and Inverse FFT.
+    https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_2d.py
 '''
 
 from einops import rearrange
