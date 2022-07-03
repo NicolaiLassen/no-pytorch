@@ -51,7 +51,7 @@ class SpectralConv1d(nn.Module):
         # (batch, in_channel, x ), (in_channel, out_channel, x) -> (batch, out_channel, x)
         return torch.einsum("bix,iox->box", input, weights)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         b, _, w = x.shape
         
         x = rearrange(x, "b c w -> b w c")
@@ -121,7 +121,7 @@ class SpectralConv2d(nn.Module):
         # (batch, in_channel, x,y ), (in_channel, out_channel, x,y) -> (batch, out_channel, x,y)
         return torch.einsum("bixy,ioxy->boxy", input, weights)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         b, _, w, h = x.shape
         
         x = rearrange(x, "b c w h -> b w h c")
@@ -161,4 +161,3 @@ class SpectralConv2d(nn.Module):
 if __name__ == '__main__':
     x = torch.rand((1, 10, 64))
     spec_1d = SpectralConv1d(10, 10)
-    print(spec_1d(x).shape)
