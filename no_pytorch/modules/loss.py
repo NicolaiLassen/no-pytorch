@@ -17,6 +17,13 @@ class LpLoss(object):
         self.p = p
         self.reduction = reduction
         self.size_average = size_average
+    
+    @staticmethod
+    def _noise(targets: torch.Tensor, n_targets: int, noise=0.0):
+        assert 0 <= noise <= 0.2
+        with torch.no_grad():
+            targets = targets * (1.0 + noise*torch.rand_like(targets))
+        return targets
 
     def abs(self, x, y):
         num_examples = x.size()[0]
@@ -68,6 +75,13 @@ class HsLoss(object):
         if a == None:
             a = [1,] * k
         self.a = a
+        
+    @staticmethod
+    def _noise(targets: torch.Tensor, n_targets: int, noise=0.0):
+        assert 0 <= noise <= 0.2
+        with torch.no_grad():
+            targets = targets * (1.0 + noise*torch.rand_like(targets))
+        return targets
 
     def rel(self, x, y):
         num_examples = x.size()[0]
