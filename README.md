@@ -6,7 +6,7 @@
 $ pip install fno-pytorch
 ```
 
-## Fourier Neural Operator - Pytorch
+## Neural Operator - Pytorch
 
 ## Usage
 
