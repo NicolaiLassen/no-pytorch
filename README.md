@@ -26,6 +26,8 @@ out = spec_1d(img) # (1, 10, 64)
 ```
 ## Resources
 
+
+
 ## Citations
 
 ```bibtex

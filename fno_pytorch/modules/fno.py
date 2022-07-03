@@ -140,3 +140,12 @@ class FNO2d(nn.Module):
             x = rearrange(x, "b w h c -> b 1 c w h")     
         
         return x
+    
+class FNO3d(nn.Module):
+    
+    def __init__(self):
+        super(FNO3d, self).__init__()
+
+    def forward(self, x):
+
+        return x

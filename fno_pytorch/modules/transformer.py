@@ -8,33 +8,8 @@
 import torch
 import torch.nn as nn
 from .fno import FNO1d, FNO2d
-from .attention import FourierAttention, GalerkinAttention
-from rotary_embedding_torch import RotaryEmbedding
+from .attention import FourierAttention, GalerkinAttention, RoPE
 import copy
-
-class RoPE(nn.Module):
-    def __init__(self,
-                dim,
-                custom_freqs = None,
-                freqs_for = 'lang',
-                theta = 10000,
-                max_freq = 10,
-                num_freqs = 1,
-                learned_freq = False
-        ):
-        super(RoPE, self).__init__()
-        self.rotary_emb = RotaryEmbedding(dim,
-                                          custom_freqs,
-                                          freqs_for,
-                                          theta,
-                                          max_freq,
-                                          num_freqs,
-                                          learned_freq
-                                          )
-    def forward(self, q: torch.Tensor, k: torch.Tensor):
-        q = self.rotary_emb.rotate_queries_or_keys(q)
-        k = self.rotary_emb.rotate_queries_or_keys(k)
-        return q, k
 
 class FourierTransformer1d(nn.Module):
     def __init__(self,
@@ -66,7 +41,7 @@ class FourierTransformer1d(nn.Module):
         self.attention_layers = nn.ModuleList(
             [copy.deepcopy(attention_layer) for _ in range(attention_depth)])    
     
-        self.regressor = FNO1d()
+        self.regressor = FNO1d(spectral_depth=spectral_depth)
 
     def forward(self, x: torch.Tensor, mask=None):
         
