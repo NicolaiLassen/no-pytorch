@@ -6,6 +6,8 @@
 $ pip install fno-pytorch
 ```
 
+## Fourier Neural Operator - Pytorch
+
 ## Usage
 
 ```python
@@ -36,3 +38,5 @@ out = spec_1d(img) # (1, 10, 64)
       primaryClass={cs.LG}
 }
 ```
+
+*We may regard the present state of the universe as the effect of its past and the cause of its future. An intellect which at a certain moment would know all forces that set nature in motion, and all positions of all items of which nature is composed, if this intellect were also vast enough to submit these data to analysis, it would embrace in a single formula the movements of the greatest bodies of the universe and those of the tiniest atom; for such an intellect nothing would be uncertain and the future just like the past would be present before its eyes* — Marquis Pierre Simon de Laplace
