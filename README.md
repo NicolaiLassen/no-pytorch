@@ -31,6 +31,19 @@ out = spec_1d(img) # (1, 10, 64)
 ## Citations
 
 ```bibtex
+@misc{https://doi.org/10.48550/arxiv.2205.13671,
+  doi = {10.48550/ARXIV.2205.13671},
+  url = {https://arxiv.org/abs/2205.13671},
+  author = {Li, Zijie and Meidani, Kazem and Farimani, Amir Barati},
+  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  title = {Transformer for Partial Differential Equations' Operator Learning},
+  publisher = {arXiv},
+  year = {2022},
+  copyright = {Creative Commons Attribution 4.0 International}
+}
+```
+
+```bibtex
 @misc{https://doi.org/10.48550/arxiv.2105.14995,
   doi = {10.48550/ARXIV.2105.14995},
   url = {https://arxiv.org/abs/2105.14995},
