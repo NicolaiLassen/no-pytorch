@@ -1,6 +1,8 @@
 '''
     @author: Shuhao Cao
     https://github.com/scaomath/galerkin-transformer/blob/main/libs/layers.py
+    @author: Zijie Li
+    https://arxiv.org/pdf/2205.13671.pdf
 '''
 
 import torch
