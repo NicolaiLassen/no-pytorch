@@ -13,13 +13,13 @@ from .functional import get_1d_grid, get_2d_grid
 
 class FNO1d(nn.Module):
     def __init__(self,
-                 in_channels=1,
-                 out_channels=1,
-                 freq_dim=20,
+                 in_channels,
+                 out_channels,
+                 freq_dim,
+                 depth_spectral_layers=8,
                  fourier_modes=12,
-                 n_spectral_layers=8,
-                 spectral_activation=nn.SiLU,
                  dim_ff=128,
+                 spectral_activation=nn.SiLU,
                  activation_ff=nn.SiLU,
                  grid=True,
                  last_activation=True
@@ -31,7 +31,7 @@ class FNO1d(nn.Module):
             self.project = nn.Linear(in_channels + 1, freq_dim)
         
         self.spectral_layers = nn.ModuleList([])
-        for _ in range(n_spectral_layers):
+        for _ in range(depth_spectral_layers):
             self.spectral_layers.append(
                 SpectralConv1d(
                     in_channels=freq_dim,
@@ -51,10 +51,7 @@ class FNO1d(nn.Module):
 
     def forward(self, x: torch.Tensor):
         
-        if x.ndim == 3:
-            x = rearrange(x, "b c w -> b w c")
-        elif x.ndim == 4:
-            x = rearrange(x, "b t c w -> b w (t c)")          
+        x = rearrange(x, "b c w -> b w c")
         
         # field and bound grid
         if self.grid:
@@ -68,24 +65,22 @@ class FNO1d(nn.Module):
             x = spectral_layer(x)
         
         x = rearrange(x, "b c w -> b w c")
+        
         x = self.fc_out(x)
         
-        if x.ndim == 3:
-            x = rearrange(x, "b w c -> b c w")
-        elif x.ndim == 4:
-            x = rearrange(x, "b w c -> b 1 c w")     
+        x = rearrange(x, "b w c -> b c w")
         
         return x
 
 class FNO2d(nn.Module):
     def __init__(self,
-                 in_channels=1,
-                 out_channels=1,
-                 freq_dim=20,
+                 in_channels,
+                 out_channels,
+                 freq_dim,
+                 depth_spectral_layers=8,
                  fourier_modes=12,
-                 n_spectral_layers=8,
-                 spectral_activation=nn.SiLU,
                  dim_ff=128,
+                 spectral_activation=nn.SiLU,
                  activation_ff=nn.SiLU,
                  grid=True,
                  last_activation=True
@@ -97,7 +92,7 @@ class FNO2d(nn.Module):
             self.project = nn.Linear(in_channels + 2, freq_dim)
         
         self.spectral_layers = nn.ModuleList([])
-        for _ in range(n_spectral_layers):
+        for _ in range(depth_spectral_layers):
             self.spectral_layers.append(
                 SpectralConv2d(
                     in_channels=freq_dim,
@@ -117,10 +112,7 @@ class FNO2d(nn.Module):
 
     def forward(self, x: torch.Tensor, grid=None):
         
-        if x.ndim == 4:
-            x = rearrange(x, "b c w h -> b w h c")
-        elif x.ndim == 5:
-            x = rearrange(x, "b t c w h -> b w h (t c)")          
+        x = rearrange(x, "b c w h -> b w h c")     
              
         # field and bound grid
         if self.grid:
@@ -134,12 +126,10 @@ class FNO2d(nn.Module):
             x = spectral_layer(x)
         
         x = rearrange(x, "b c w h -> b w h c")
+        
         x = self.fc_out(x)
         
-        if x.ndim == 4:
-            x = rearrange(x, "b w h c -> b c w h")
-        elif x.ndim == 5:
-            x = rearrange(x, "b w h c -> b 1 c w h")     
+        x = rearrange(x, "b w h c -> b c w h")
         
         return x
     
