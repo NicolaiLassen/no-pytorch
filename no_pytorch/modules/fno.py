@@ -25,7 +25,8 @@ class FNO1d(nn.Module):
                  last_activation=True
         ):
         super(FNO1d, self).__init__()
-
+        
+        self.grid = grid
         if grid:
             self.project = nn.Linear(in_channels + 1, freq_dim)
         
@@ -33,9 +34,9 @@ class FNO1d(nn.Module):
         for _ in range(n_spectral_layers):
             self.spectral_layers.append(
                 SpectralConv1d(
-                    freq_dim=freq_dim,
-                    freq_dim=freq_dim,
-                    fourier_modes=fourier_modes,
+                    in_channels=freq_dim,
+                    out_channels=freq_dim,
+                    modes=fourier_modes,
                     activation=spectral_activation
                 ))
 
@@ -56,13 +57,13 @@ class FNO1d(nn.Module):
             x = rearrange(x, "b t c w -> b w (t c)")          
         
         # field and bound grid
-        if grid:
+        if self.grid:
             grid = get_1d_grid(x.shape, x.device)
             x = torch.cat((x, grid), dim=-1)
             x = self.project(x)
         
         x = rearrange(x, "b w c -> b c w")
-                
+        
         for spectral_layer in self.spectral_layers:
             x = spectral_layer(x)
         
@@ -91,6 +92,7 @@ class FNO2d(nn.Module):
         ):
         super(FNO2d, self).__init__()
 
+        self.grid = grid
         if grid:
             self.project = nn.Linear(in_channels + 2, freq_dim)
         
@@ -98,9 +100,9 @@ class FNO2d(nn.Module):
         for _ in range(n_spectral_layers):
             self.spectral_layers.append(
                 SpectralConv2d(
-                    freq_dim=freq_dim,
-                    freq_dim=freq_dim,
-                    fourier_modes=fourier_modes,
+                    in_channels=freq_dim,
+                    out_channels=freq_dim,
+                    modes=fourier_modes,
                     activation=spectral_activation
                 ))
 
@@ -121,7 +123,7 @@ class FNO2d(nn.Module):
             x = rearrange(x, "b t c w h -> b w h (t c)")          
              
         # field and bound grid
-        if grid:
+        if self.grid:
             grid = get_2d_grid(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=-1)
             x = self.project(x)
