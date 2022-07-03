@@ -1,9 +1,7 @@
 '''
     @author: Zongyi Li
-    1D Fourier layer. It does FFT, linear transform, and Inverse FFT.
+    Fourier layer. It does FFT, linear transform, and Inverse FFT.
     https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_1d.py
-    
-    2D Fourier layer. It does FFT, linear transform, and Inverse FFT.
     https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_2d.py
 '''
 
@@ -67,8 +65,10 @@ class FNO1d(nn.Module):
     
     def get_grid(self, shape, device):
         batchsize, size_x = shape[0], shape[1]
+        
         gridx = torch.linspace(0, 1, size_x, dtype=torch.float)
         gridx = gridx.reshape(1, size_x, 1).repeat([batchsize, 1, 1])
+        
         return gridx.to(device)
 
 class FNO2d(nn.Module):
@@ -110,7 +110,7 @@ class FNO2d(nn.Module):
         x = self.project(x)
         
         x = rearrange(x, "b w h c -> b c w h")
-                
+
         for spectral in self.layers:
             x = spectral(x)
         
@@ -126,9 +126,10 @@ class FNO2d(nn.Module):
 
     def get_grid(self, shape, device):
         batchsize, size_x, size_y = shape[0], shape[1], shape[2]
+        
         gridx = torch.linspace(0, 1, size_x, dtype=torch.float)
         gridx = gridx.reshape(1, size_x, 1, 1).repeat([batchsize, 1, size_y, 1])
-        
         gridy = torch.linspace(0, 1, size_y, dtype=torch.float)
         gridy = gridy.reshape(1, 1, size_y, 1).repeat([batchsize, size_x, 1, 1])
+        
         return torch.cat((gridx, gridy), dim=-1).to(device)
