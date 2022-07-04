@@ -11,12 +11,7 @@ import torch
 import torch.nn as nn
 import torch.fft as fft
 from torch.nn.init import xavier_normal_
-
-def pair(t):
-    return t if isinstance(t, tuple) else (t, t)
-
-def triplet(t):
-    return t if isinstance(t, tuple) else (t, t, t)
+from .functional import pair, triplet
 
 class SpectralConv1d(nn.Module):
     def __init__(self,
@@ -186,7 +181,7 @@ class SpectralConv3d(nn.Module):
 
     def forward(self, x):
         b, _, w, h, d = x.shape
-                
+        
         assert self.modes_x <= w, "Modes x should be smaller than w"
         assert self.modes_y <= h, "Modes y should be smaller than h"
         assert self.modes_z <= d // 2 + 1, "Modes z should be smaller than h // 2 + 1"

@@ -51,3 +51,9 @@ def default(value, d):
     helper taken from https://github.com/lucidrains/linear-attention-transformer
     '''
     return d if value is None else value
+
+def pair(t):
+    return t if isinstance(t, tuple) else (t, t)
+
+def triplet(t):
+    return t if isinstance(t, tuple) else (t, t, t)
