@@ -88,8 +88,7 @@ class FourierAttention(nn.Module):
             self.head_pos(q, k)
             
         return        
-        
-        
+
 class GalerkinAttention(nn.Module):
     '''
     The attention is using a vanilla (QK^T)V or Q(K^T V) with no softmax
