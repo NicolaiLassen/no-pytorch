@@ -31,7 +31,7 @@ class FeedForward(nn.Module):
         super(FeedForward, self).__init__()
         out_dim = default(out_dim, dim)
 
-        self.lr1 = nn.Linear(dim, hidden_dim)
+        self.fc_in = nn.Linear(dim, hidden_dim)
 
         if activation == 'silu':
             self.activation = nn.SiLU()
@@ -44,11 +44,11 @@ class FeedForward(nn.Module):
         if self.batch_norm:
             self.bn = nn.BatchNorm1d(hidden_dim)
             
-        self.lr2 = nn.Linear(hidden_dim, out_dim)
+        self.fc_out = nn.Linear(hidden_dim, out_dim)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
-        x = self.activation(self.lr1(x))
+        x = self.activation(self.fc_in(x))
         x = self.dropout(x)
         
         if self.batch_norm:
@@ -56,7 +56,7 @@ class FeedForward(nn.Module):
             x = self.bn(x)
             x = x.permute((0, 2, 1))
         
-        x = self.lr2(x)
+        x = self.fc_out(x)
         return x
 
 class FourierTransformer(nn.Module):
@@ -89,8 +89,6 @@ class FourierTransformer(nn.Module):
                 PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout))
             ]))
         
-        self.dropout = nn.Dropout(self.dropout)
-    
     def forward(self, x: torch.Tensor, mask=None):
         for att, ff in self.attention_layers:
             x = att(x, mask=mask) + x
@@ -126,8 +124,6 @@ class GalerkinTransformer(nn.Module):
                         ),
                 PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout))
             ]))
-        
-        self.dropout = nn.Dropout(self.dropout)
     
     def forward(self, x: torch.Tensor, mask=None):
         for att, ff in self.attention_layers:
