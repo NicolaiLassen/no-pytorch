@@ -7,7 +7,6 @@
     https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_2d.py
 '''
 
-from einops import rearrange
 import torch
 import torch.nn as nn
 import torch.fft as fft
@@ -159,10 +158,6 @@ class SpectralConv3d(nn.Module):
                  return_freq=False
                  ):
         super(SpectralConv3d, self).__init__()
-
-        """
-        3D Fourier layer. It does FFT, linear transform, and Inverse FFT.    
-        """
 
         self.in_channels = in_channels
         self.out_channels = out_channels

@@ -3,13 +3,14 @@
     Fourier layer. It does FFT, linear transform, and Inverse FFT.
     https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_1d.py
     https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_2d.py
+    https://github.com/zongyi-li/fourier_neural_operator/blob/74b1572d4e02f215728b4aa5bf46374ed7daba06/fourier_3d.py
 '''
 
 import torch
 from einops import rearrange
 import torch.nn as nn
 from .spectral_conv import SpectralConv1d, SpectralConv2d, SpectralConv3d
-from .functional import get_1d_grid, get_2d_grid, get_3d_grid
+from .functional import get_grid_1d, get_grid_2d, get_grid_3d
 
 class FNO1d(nn.Module):
     def __init__(self,
@@ -54,7 +55,7 @@ class FNO1d(nn.Module):
         
         # field and bound grid
         if self.grid:
-            grid = get_1d_grid(x.shape, x.device)
+            grid = get_grid_1d(x.shape, x.device)
             x = torch.cat((x, grid), dim=1)
             x = self.project(x)
         
@@ -112,7 +113,7 @@ class FNO2d(nn.Module):
         
         # field and bound grid
         if self.grid:
-            grid = get_2d_grid(x.shape, x.device) if grid is None else grid
+            grid = get_grid_2d(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=1)
             x = self.project(x)
         
@@ -170,7 +171,7 @@ class FNO3d(nn.Module):
         
         # field and bound grid
         if self.grid:
-            grid = get_3d_grid(x.shape, x.device) if grid is None else grid
+            grid = get_grid_3d(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=1)
             x = self.project(x)
         
