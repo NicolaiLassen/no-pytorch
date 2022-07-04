@@ -7,97 +7,130 @@
 
 import torch
 import torch.nn as nn
-from .fno import FNO1d, FNO2d
+from torch.nn.init import xavier_normal_
+from .fno import FNO1d, FNO2d, FNO3d
 from .attention import FourierAttention, GalerkinAttention, RoPE
-import copy
+from .functional import default
 
-class FourierTransformer1d(nn.Module):
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):
+        super().__init__()
+        self.norm = nn.LayerNorm(dim)
+        self.fn = fn
+    def forward(self, x, **kwargs):
+        return self.fn(self.norm(x), **kwargs)
+
+class FeedForward(nn.Module):
+    def __init__(self, 
+                 dim=256,
+                 hidden_dim: int = 1024,
+                 out_dim=None,
+                 batch_norm=False,
+                 activation='relu',
+                 dropout=0.1):
+        super(FeedForward, self).__init__()
+        out_dim = default(out_dim, dim)
+
+        self.lr1 = nn.Linear(dim, hidden_dim)
+
+        if activation == 'silu':
+            self.activation = nn.SiLU()
+        elif activation == 'gelu':
+            self.activation = nn.GELU()
+        else:
+            self.activation = nn.ReLU()
+
+        self.batch_norm = batch_norm
+        if self.batch_norm:
+            self.bn = nn.BatchNorm1d(hidden_dim)
+            
+        self.lr2 = nn.Linear(hidden_dim, out_dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        x = self.activation(self.lr1(x))
+        x = self.dropout(x)
+        
+        if self.batch_norm:
+            x = x.permute((0, 2, 1))
+            x = self.bn(x)
+            x = x.permute((0, 2, 1))
+        
+        x = self.lr2(x)
+        return x
+
+class FourierTransformer(nn.Module):
     def __init__(self,
-                in_channels,
-                out_channels,
+                dim=64,
                 dim_head=64,
                 heads=4,
-                attention_depth=4,
-                spectral_depth=1,
-                spectral_dim=20,
-                head_pos=RoPE,
-                attn_norm=False,
-                xavier_init=0.01,
-                diagonal_weight=0.01,
+                mlp_dim=128,
+                depth=4,
+                dropout=0.1,
+                rel_pos=None,
+                attn_init=xavier_normal_,
+                diagonal_weight=0.01
         ):
-        super(FourierTransformer1d, self).__init__()
+        super(FourierTransformer, self).__init__()
         
-        self.project = nn.Linear(in_channels, spectral_dim)
+        self.attention_layers = []
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                PreNorm(dim, 
+                       FourierAttention(
+                                dim=dim,
+                                heads=heads,
+                                dim_head=dim_head,
+                                rel_pos=rel_pos(dim_head),
+                                init=attn_init,
+                                diagonal_weight=diagonal_weight
+                            )
+                        ),
+                PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout))
+            ]))
         
-        attention_layer = FourierAttention(
-            in_channels=spectral_dim,
-            out_channels=out_channels,
-            heads=heads,
-            dim_head=dim_head,
-            head_pos=head_pos(dim_head),
-            xavier_init=xavier_init,
-            diagonal_weight=diagonal_weight
-        )
-        self.attention_layers = nn.ModuleList(
-            [copy.deepcopy(attention_layer) for _ in range(attention_depth)])    
+        self.dropout = nn.Dropout(self.dropout)
     
-        self.regressor = FNO1d(spectral_depth=spectral_depth)
-
     def forward(self, x: torch.Tensor, mask=None):
-        
-        x = self.project(x)
-        
-        for attention in self.attention_layers:
-            x = attention(x, mask=mask)
-        
-        self.regressor(x)
-        
+        for att, ff in self.attention_layers:
+            x = att(x, mask=mask) + x
+            x = ff(x) + x
         return x
-    
-    def get_grid(self, shape, device):
-        return
-    
-class GalerkinTransformer1d(nn.Module):
+
+class GalerkinTransformer(nn.Module):
     def __init__(self,
-                 head_pos=RoPE,
-                 dim_head=64
+                dim=64,
+                dim_head=64,
+                heads=4,
+                mlp_dim=128,
+                depth=4,
+                dropout=0.1,
+                rel_pos=None,
+                attn_init=xavier_normal_,
+                diagonal_weight=0.01
         ):
-        super(GalerkinTransformer1d, self).__init__()
+        super(GalerkinTransformer, self).__init__()
         
-        GalerkinAttention()
+        self.attention_layers = []
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                PreNorm(dim, 
+                       GalerkinAttention(
+                                dim=dim,
+                                heads=heads,
+                                dim_head=dim_head,
+                                rel_pos=rel_pos(dim_head),
+                                init=attn_init,
+                                diagonal_weight=diagonal_weight
+                            )
+                        ),
+                PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout))
+            ]))
         
-    def forward(self, x: torch.Tensor):
-        return
+        self.dropout = nn.Dropout(self.dropout)
     
-    def get_grid(self, shape, device):
-        return
-   
-class FourierTransformer2d(nn.Module):
-    def __init__(self,
-                 head_pos=RoPE,
-                 dim_head=64
-        ):
-        super(FourierTransformer2d, self).__init__()
-        
-        pos = head_pos(dim_head)
-        FourierAttention()
-        
-    def forward(self, x: torch.Tensor):
-        return
-    
-    def get_grid(self, shape, device):
-        return
-    
-class GalerkinTransformer2d(nn.Module):
-    def __init__(self,
-                 
-        ):
-        super(GalerkinTransformer2d, self).__init__()
-        
-        GalerkinAttention()
-        
-    def forward(self, x: torch.Tensor):
-        return
-    
-    def get_grid(self, shape, device):
-        return
+    def forward(self, x: torch.Tensor, mask=None):
+        for att, ff in self.attention_layers:
+            x = att(x, mask=mask) + x
+            x = ff(x) + x
+        return x

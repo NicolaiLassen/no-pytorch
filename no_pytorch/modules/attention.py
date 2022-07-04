@@ -7,6 +7,7 @@
 
 import torch
 import torch.nn as nn
+from torch.nn.init import xavier_normal_
 from einops import rearrange
 import copy
 from rotary_embedding_torch import RotaryEmbedding
@@ -38,11 +39,11 @@ class RoPE(nn.Module):
 class FourierAttention(nn.Module):
     def __init__(self,
                  dim,
-                 head_pos,
+                 rel_pos=None,
                  heads=8,
                  dim_head=64,
                  dropout=0.1,
-                 xavier_init=1e-4,
+                 init=xavier_normal_,
                  diagonal_weight=1e-2,
                  symmetric_init=False,
                  norm=False,
@@ -53,21 +54,16 @@ class FourierAttention(nn.Module):
         inner_dim = dim_head *  heads    
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
         
-        self.head_pos = head_pos
+        self.head_pos = rel_pos
         
-        self.xavier_init = xavier_init
         self.diagonal_weight = diagonal_weight
         self.symmetric_init = symmetric_init
-        
-        if self.xavier_init > 0:
-            self._reset_parameters()
         
         self.add_norm = norm
         self.norm_type = norm_type
         
         if norm:
             self._get_norm(eps=eps)
-
 
         self.attn_weight = None
         self.dropout = nn.Dropout(dropout)
@@ -85,7 +81,7 @@ class FourierAttention(nn.Module):
         q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h = self.heads), qkv)
         
         if self.head_pos is not None:
-            self.head_pos(q, k)
+           q, k = self.head_pos(q, k)
             
         return        
 

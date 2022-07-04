@@ -14,21 +14,15 @@ $ pip install no-pytorch
 
 ```python
 import torch
-from no_pytorch import SpectralConv1d
+from no_pytorch import FNO1d
 
-spec_1d = SpectralConv1d(
-            in_channels = 10,
-            out_channels = 10,
-            modes = 12
-            )
+x = torch.rand(1, 10, 8)
 
-x = torch.rand(1, 10, 64)
+model = FNO1d(in_channels=10, out_channels=1, fourier_modes=4, depth=8, freq_dim=20)
 
-out = spec_1d(img) # (1, 10, 64)
+model(x)  # (1, 1, 8)
 ```
 ## Resources
-
-
 
 ## Citations
 

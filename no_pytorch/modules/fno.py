@@ -17,8 +17,8 @@ class FNO1d(nn.Module):
                  in_channels,
                  out_channels,
                  freq_dim,
-                 depth_spectral_layers=8,
                  fourier_modes=12,
+                 depth=8,
                  dim_ff=128,
                  spectral_activation=nn.SiLU,
                  activation_ff=nn.SiLU,
@@ -33,7 +33,7 @@ class FNO1d(nn.Module):
             self.project = nn.Conv1d(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
-        for _ in range(depth_spectral_layers):
+        for _ in range(depth):
             self.spectral_layers.append(
                 SpectralConv1d(
                     in_channels=freq_dim,
@@ -75,8 +75,8 @@ class FNO2d(nn.Module):
                  in_channels,
                  out_channels,
                  freq_dim,
-                 depth_spectral_layers=8,
                  fourier_modes=12,
+                 depth=8,
                  dim_ff=128,
                  spectral_activation=nn.SiLU,
                  activation_ff=nn.SiLU,
@@ -91,7 +91,7 @@ class FNO2d(nn.Module):
             self.project = nn.Conv2d(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
-        for _ in range(depth_spectral_layers):
+        for _ in range(depth):
             self.spectral_layers.append(
                 SpectralConv2d(
                     in_channels=freq_dim,
@@ -133,8 +133,8 @@ class FNO3d(nn.Module):
                  in_channels,
                  out_channels,
                  freq_dim,
-                 depth_spectral_layers=8,
                  fourier_modes=12,
+                 depth=8,
                  dim_ff=128,
                  spectral_activation=nn.SiLU,
                  activation_ff=nn.SiLU,
@@ -149,7 +149,7 @@ class FNO3d(nn.Module):
             self.project = nn.Conv3d(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
-        for _ in range(depth_spectral_layers):
+        for _ in range(depth):
             self.spectral_layers.append(
                 SpectralConv3d(
                     in_channels=freq_dim,
