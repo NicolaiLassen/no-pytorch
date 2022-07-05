@@ -57,3 +57,6 @@ def pair(t):
 
 def triplet(t):
     return t if isinstance(t, tuple) else (t, t, t)
+
+def exists(val):
+    return val is not None

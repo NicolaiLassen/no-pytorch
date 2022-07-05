@@ -9,7 +9,8 @@ import torch
 import torch.nn as nn
 from torch.nn.init import xavier_normal_
 from .fno import FNO1d, FNO2d, FNO3d
-from .attention import FourierAttention, GalerkinAttention, RoPE
+from .attention import FourierAttention, GalerkinAttention
+from .pos import RoPE
 from .functional import default
 
 class PreNorm(nn.Module):
