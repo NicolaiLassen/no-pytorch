@@ -13,6 +13,14 @@ from .functional import exists
 
 # Relative
 
+class Grid(nn.Module):
+    def __init__(self):
+        super(Grid, self).__init__()
+
+    def forward(self, x):
+
+        return x
+
 class RoPE(nn.Module):
     def __init__(self,
                 dim,

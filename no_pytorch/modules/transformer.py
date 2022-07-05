@@ -10,7 +10,7 @@ import torch.nn as nn
 from torch.nn.init import xavier_normal_
 from .fno import FNO1d, FNO2d, FNO3d
 from .attention import FourierAttention, GalerkinAttention
-from .pos import RoPE
+from .pos import RoPE, Grid
 from .functional import default
 
 class PreNorm(nn.Module):
@@ -59,6 +59,14 @@ class FeedForward(nn.Module):
         
         x = self.fc_out(x)
         return x
+    
+
+class CrossAttention(nn.Module):
+    def __init__(self):
+        super(CrossAttention, self).__init__()
+
+    def forward(self, x):
+        return x
 
 class FourierTransformer(nn.Module):
     def __init__(self,
@@ -68,7 +76,7 @@ class FourierTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
-                rel_pos=None,
+                rel_pos=Grid,
                 attn_init=xavier_normal_,
                 diagonal_weight=0.01
         ):
@@ -104,7 +112,7 @@ class GalerkinTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
-                rel_pos=None,
+                rel_pos=Grid,
                 attn_init=xavier_normal_,
                 diagonal_weight=0.01
         ):
