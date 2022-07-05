@@ -11,6 +11,8 @@ from einops import rearrange
 import math
 from .functional import exists
 
+# Relative
+
 class RoPE(nn.Module):
     def __init__(self,
                 dim,
@@ -34,7 +36,7 @@ class RoPE(nn.Module):
         q = self.rotary_emb.rotate_queries_or_keys(q)
         k = self.rotary_emb.rotate_queries_or_keys(k)
         return q, k
-    
+
 class DynamicPositionBias(nn.Module):
     def __init__(self, dim, *, heads, depth, log_distance = False, norm = False):
         super().__init__()
