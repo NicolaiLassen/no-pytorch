@@ -1,6 +1,6 @@
 from .spectral_conv import SpectralConv1d, SpectralConv2d
 from .fno import FNO1d, FNO2d, FNO3d
-from .attention import GalerkinAttention, FourierAttention
+from .attention import GalerkinAttention, FourierAttention, CrossAttention
 from .transformer import FourierTransformer, GalerkinTransformer
 from .loss import LpLoss, HsLoss, WeightedL2Loss, WeightedL2Loss2d
 from .pos import RoPE, Grid, AlibiPositionalBias, DynamicPositionBias

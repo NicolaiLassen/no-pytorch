@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 from torch.nn.init import xavier_normal_
 from .fno import FNO1d, FNO2d, FNO3d
-from .attention import FourierAttention, GalerkinAttention
+from .attention import FourierAttention, GalerkinAttention, CrossAttention
 from .pos import RoPE, Grid
 from .functional import default
 
@@ -50,14 +50,6 @@ class FeedForward(nn.Module):
             x = x.permute((0, 2, 1))
         
         x = self.fc_out(x)
-        return x
-    
-
-class CrossAttention(nn.Module):
-    def __init__(self):
-        super(CrossAttention, self).__init__()
-
-    def forward(self, x):
         return x
 
 class FourierTransformer(nn.Module):

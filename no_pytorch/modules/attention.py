@@ -62,6 +62,14 @@ class FourierAttention(nn.Module):
             
         return
 
+class CrossAttention(nn.Module):
+    def __init__(self):
+        super(CrossAttention, self).__init__()
+
+    def forward(self, x):
+        raise "NOT IMPLEMENTED"
+        return x
+
 class GalerkinAttention(nn.Module):
     def __init__(self,
                  dim,
