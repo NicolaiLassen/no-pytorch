@@ -74,7 +74,9 @@ class GalerkinAttention(nn.Module):
                  diagonal_weight=1e-2,
                  symmetric_init=False,
                  norm=True,
-                 eps=1e-5,):
+                 eps=1e-5,
+                 return_att=False  
+                 ):
         super(GalerkinAttention, self).__init__()
         
         self.d_k = dim // heads
@@ -85,12 +87,10 @@ class GalerkinAttention(nn.Module):
         self.head_pos = rel_pos
         self.dot_pos = dot_pos
         
-        self.symmetric_init = symmetric_init
-        
         self.pos_dim = pos_dim
         self.norm = norm
         
-        self.attn_weight = None
+        self.return_att = return_att
         self.dropout = nn.Dropout(dropout)
         
         self.norm_K = self._get_layernorm(self.d_k, self.heads, eps=eps)
@@ -138,6 +138,8 @@ class GalerkinAttention(nn.Module):
          
         out = x.transpose(1, 2).contiguous().view(b, -1, out_dim)
         
+        if self.return_att:
+            raise out, p_attn
         return  out      
     
     @staticmethod
