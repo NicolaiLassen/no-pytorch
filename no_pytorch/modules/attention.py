@@ -63,7 +63,8 @@ class FourierAttention(nn.Module):
         qkv= self.to_qkv(x).chunk(3, dim = -1)
         
         if self.qkv_pos is not None:
-           assert self.dim_head == self.qkv_pos.dim
+           assert self.dim_head == self.qkv_pos.dim,\
+               f'Size of head dim and pos dim much match, got {self.dim_head}, {self.qkv_pos.dim}'
            qkv = self.qkv_pos(*qkv, pos, self.heads)
            
         q, k, v = \
@@ -151,8 +152,9 @@ class GalerkinAttention(nn.Module):
         qkv = self.to_qkv(x).chunk(3, dim = -1)
         
         if self.qkv_pos is not None:
-           assert self.dim_head == self.qkv_pos.dim
-           qkv = self.qkv_pos(*qkv, pos, self.heads)
+            assert self.dim_head == self.qkv_pos.dim,\
+                f'Size of head dim and pos dim much match, got {self.dim_head}, {self.qkv_pos.dim}'
+            qkv = self.qkv_pos(*qkv, pos, self.heads)
         
         q, k, v = \
             map(lambda t:  rearrange(t, 'b n (h k d) -> b h (n d) k', h = self.heads, k=self.d_k), qkv)
