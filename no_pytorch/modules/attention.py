@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from torch.nn.init import xavier_normal_
 from einops import rearrange
 import copy
+import vit_pytorch.vit
 
 class CrossAttention(nn.Module):
     def __init__(self):

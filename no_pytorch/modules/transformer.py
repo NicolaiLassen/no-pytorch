@@ -74,11 +74,11 @@ class FourierTransformer(nn.Module):
                 symmetric_init=False,
                 qkv_pos=None,
                 dot_pos=None,
-                attn_init=xavier_normal_,
+                attn_init=xavier_normal_
         ):
         super(FourierTransformer, self).__init__()
         
-        self.attention_layers = []
+        self.attention_layers = nn.ModuleList([])
         for _ in range(depth):
             self.attention_layers.append(nn.ModuleList([
                 FourierAttention(
@@ -114,11 +114,11 @@ class GalerkinTransformer(nn.Module):
                 symmetric_init=False,
                 qkv_pos=None,
                 dot_pos=None,
-                attn_init=xavier_normal_,
+                attn_init=xavier_normal_
         ):
         super(GalerkinTransformer, self).__init__()
         
-        self.attention_layers = []
+        self.attention_layers = nn.ModuleList([])
         for _ in range(depth):
             self.attention_layers.append(nn.ModuleList([
                 GalerkinAttention(
