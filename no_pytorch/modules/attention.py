@@ -12,6 +12,14 @@ from torch.nn.init import xavier_normal_
 from einops import rearrange
 import copy
 
+class CrossAttention(nn.Module):
+    def __init__(self):
+        super(CrossAttention, self).__init__()
+
+    def forward(self, x):
+        raise "NOT IMPLEMENTED"
+        return x
+
 class FourierAttention(nn.Module):
     def __init__(self,
                  dim,
@@ -96,14 +104,6 @@ class FourierAttention(nn.Module):
     def _get_layernorm(normalized_dim, n_head, **kwargs):
         return nn.ModuleList(
             [copy.deepcopy(nn.LayerNorm(normalized_dim, **kwargs)) for _ in range(n_head)])
-
-class CrossAttention(nn.Module):
-    def __init__(self):
-        super(CrossAttention, self).__init__()
-
-    def forward(self, x):
-        raise "NOT IMPLEMENTED"
-        return x
 
 class GalerkinAttention(nn.Module):
     def __init__(self,

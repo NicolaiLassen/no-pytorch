@@ -60,10 +60,12 @@ class FourierTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
+                att_dropout=0,
+                diagonal_weight=1e-2,
+                symmetric_init=False,
                 qkv_pos=None,
                 dot_pos=None,
                 attn_init=xavier_normal_,
-                diagonal_weight=0.01
         ):
         super(FourierTransformer, self).__init__()
         
@@ -77,6 +79,9 @@ class FourierTransformer(nn.Module):
                                 qkv_pos=None if qkv_pos is None else qkv_pos,
                                 dot_pos=None if dot_pos is None else dot_pos,  
                                 init=attn_init,
+                                dropout=att_dropout,
+                                diagonal_weight=1e-2,
+                                symmetric_init=False,
                                 diagonal_weight=diagonal_weight
                             ),
                 FeedForward(dim, mlp_dim, dropout = dropout)
@@ -96,10 +101,12 @@ class GalerkinTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
+                att_dropout=0,
+                diagonal_weight=1e-2,
+                symmetric_init=False,
                 qkv_pos=None,
                 dot_pos=None,
                 attn_init=xavier_normal_,
-                diagonal_weight=0.01
         ):
         super(GalerkinTransformer, self).__init__()
         
@@ -113,6 +120,9 @@ class GalerkinTransformer(nn.Module):
                                 qkv_pos=None if qkv_pos is None else qkv_pos,
                                 dot_pos=None if dot_pos is None else dot_pos,  
                                 init=attn_init,
+                                dropout=att_dropout,
+                                diagonal_weight=1e-2,
+                                symmetric_init=False,
                                 diagonal_weight=diagonal_weight
                             ),
                 FeedForward(dim, mlp_dim, dropout = dropout)
