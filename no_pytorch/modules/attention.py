@@ -100,8 +100,9 @@ class GalerkinAttention(nn.Module):
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
         b = x.size(0)
-        qkv = self.to_qkv(x).chunk(3, dim = -1)
-        q, k, v = map(lambda t: (t.reshape(b, -1, self.heads, self.d_k).transpose(1, 2)), qkv)
+        qkv = self.to_qkv(x).chunk(3, dim = -1)        
+        q, k, v = \
+            map(lambda t:  rearrange(t, 'b n (h k d) -> b (n d) h k', h = self.heads, k=self.d_k).transpose(1, 2), qkv)
         
         if weight is not None:
             q, k = weight*q, weight*k
