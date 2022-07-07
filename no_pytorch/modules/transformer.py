@@ -119,3 +119,12 @@ class GalerkinTransformer(nn.Module):
             x = att(x, mask=mask) + x
             x = ff(x) + x
         return x
+    
+class CrossAttentionTransformer(nn.Module):
+    def __init__(self):
+        super(CrossAttentionTransformer
+    , self).__init__()
+
+    def forward(self, x):
+        raise "NOT IMPLEMENTED"
+        return x
