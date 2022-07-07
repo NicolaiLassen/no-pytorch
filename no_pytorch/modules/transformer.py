@@ -5,6 +5,7 @@
     https://arxiv.org/pdf/2205.13671.pdf
 '''
 
+from tkinter import N
 import torch
 import torch.nn as nn
 from torch.nn.init import xavier_normal_
@@ -59,7 +60,8 @@ class FourierTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
-                rel_pos=None,
+                qkv_pos=None,
+                dot_pos=None,
                 attn_init=xavier_normal_,
                 diagonal_weight=0.01
         ):
@@ -72,7 +74,8 @@ class FourierTransformer(nn.Module):
                                 dim=dim,
                                 heads=heads,
                                 dim_head=dim_head,
-                                rel_pos=rel_pos(dim_head),
+                                qkv_pos=None if qkv_pos is None else qkv_pos,
+                                dot_pos=None if dot_pos is None else dot_pos,  
                                 init=attn_init,
                                 diagonal_weight=diagonal_weight
                             ),
@@ -93,7 +96,8 @@ class GalerkinTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
-                rel_pos=None,
+                qkv_pos=None,
+                dot_pos=None,
                 attn_init=xavier_normal_,
                 diagonal_weight=0.01
         ):
@@ -106,7 +110,8 @@ class GalerkinTransformer(nn.Module):
                                 dim=dim,
                                 heads=heads,
                                 dim_head=dim_head,
-                                rel_pos=None if rel_pos is None else rel_pos,
+                                qkv_pos=None if qkv_pos is None else qkv_pos,
+                                dot_pos=None if dot_pos is None else dot_pos,  
                                 init=attn_init,
                                 diagonal_weight=diagonal_weight
                             ),
