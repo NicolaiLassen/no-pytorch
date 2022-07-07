@@ -45,6 +45,7 @@ class FourierAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, query, key, value, pos=None, mask=None, weight=None):
+        raise "NOT IMPLEMENTED"
         if mask is not None:
             mask = mask.unsqueeze(1)
 
@@ -102,7 +103,7 @@ class GalerkinAttention(nn.Module):
         b = x.size(0)
         qkv = self.to_qkv(x).chunk(3, dim = -1)        
         q, k, v = \
-            map(lambda t:  rearrange(t, 'b n (h k d) -> b (n d) h k', h = self.heads, k=self.d_k).transpose(1, 2), qkv)
+            map(lambda t:  rearrange(t, 'b n (h k d) -> b h (n d) k', h = self.heads, k=self.d_k), qkv)
         
         if weight is not None:
             q, k = weight*q, weight*k
@@ -139,7 +140,7 @@ class GalerkinAttention(nn.Module):
         out = x.transpose(1, 2).contiguous().view(b, -1, out_dim)
         
         if self.return_att:
-            raise out, p_attn
+            return out, p_attn
         return  out      
     
     @staticmethod
