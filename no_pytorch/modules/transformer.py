@@ -8,7 +8,6 @@
 import torch
 import torch.nn as nn
 from torch.nn.init import xavier_normal_
-from .fno import FNO1d, FNO2d, FNO3d
 from .attention import FourierAttention, GalerkinAttention, CrossAttention
 from .pos import RoPE, Grid
 from .functional import default
@@ -60,7 +59,7 @@ class FourierTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
-                rel_pos=Grid,
+                rel_pos=None,
                 attn_init=xavier_normal_,
                 diagonal_weight=0.01
         ):
@@ -68,7 +67,7 @@ class FourierTransformer(nn.Module):
         
         self.attention_layers = []
         for _ in range(depth):
-            self.layers.append(nn.ModuleList([
+            self.attention_layers.append(nn.ModuleList([
                 FourierAttention(
                                 dim=dim,
                                 heads=heads,
@@ -94,7 +93,7 @@ class GalerkinTransformer(nn.Module):
                 mlp_dim=128,
                 depth=4,
                 dropout=0.1,
-                rel_pos=Grid,
+                rel_pos=None,
                 attn_init=xavier_normal_,
                 diagonal_weight=0.01
         ):
@@ -102,12 +101,12 @@ class GalerkinTransformer(nn.Module):
         
         self.attention_layers = []
         for _ in range(depth):
-            self.layers.append(nn.ModuleList([
+            self.attention_layers.append(nn.ModuleList([
                 GalerkinAttention(
                                 dim=dim,
                                 heads=heads,
                                 dim_head=dim_head,
-                                rel_pos=rel_pos(dim_head),
+                                rel_pos=None if rel_pos is None else rel_pos,
                                 init=attn_init,
                                 diagonal_weight=diagonal_weight
                             ),
