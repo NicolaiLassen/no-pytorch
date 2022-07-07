@@ -13,14 +13,6 @@ from .attention import FourierAttention, GalerkinAttention
 from .pos import RoPE, Grid
 from .functional import default
 
-class PreNorm(nn.Module):
-    def __init__(self, dim, fn):
-        super().__init__()
-        self.norm = nn.LayerNorm(dim)
-        self.fn = fn
-    def forward(self, x, **kwargs):
-        return self.fn(self.norm(x), **kwargs)
-
 class FeedForward(nn.Module):
     def __init__(self, 
                  dim=256,
@@ -85,17 +77,15 @@ class FourierTransformer(nn.Module):
         self.attention_layers = []
         for _ in range(depth):
             self.layers.append(nn.ModuleList([
-                PreNorm(dim, 
-                       FourierAttention(
+                FourierAttention(
                                 dim=dim,
                                 heads=heads,
                                 dim_head=dim_head,
                                 rel_pos=rel_pos(dim_head),
                                 init=attn_init,
                                 diagonal_weight=diagonal_weight
-                            )
-                        ),
-                PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout))
+                            ),
+                FeedForward(dim, mlp_dim, dropout = dropout)
             ]))
         
     def forward(self, x: torch.Tensor, mask=None):

@@ -1,12 +1,15 @@
 """ Testing the pack """
 
 import torch
-from no_pytorch import FNO1d
+from no_pytorch import FNO2d
+import vit_pytorch.vit
+import torch.nn as nn
+from einops import rearrange
 
-x = torch.rand(1, 10, 8)
+from no_pytorch.modules.attention import GalerkinAttention
 
-model = FNO1d(in_channels=10, out_channels=1, fourier_modes=4, depth=8, freq_dim=20)
+x = torch.rand(1, 10, 64)
 
-model(x)
+model = GalerkinAttention(dim=64)
 
 print(model(x).shape)

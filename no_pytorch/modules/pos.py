@@ -1,5 +1,5 @@
 '''
-    @author: Zongyi Li
+    @author: 
     https://github.com/lucidrains/x-transformers/blob/main/x_transformers/x_transformers.py
 '''
 
