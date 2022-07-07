@@ -65,6 +65,7 @@ class GalerkinAttention(nn.Module):
     def __init__(self,
                  dim,
                  rel_pos=None,
+                 dot_pos=None,
                  pos_dim: int = 1,
                  heads=8,
                  dim_head=64,
@@ -82,6 +83,7 @@ class GalerkinAttention(nn.Module):
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
         
         self.head_pos = rel_pos
+        self.dot_pos = dot_pos
         
         self.symmetric_init = symmetric_init
         
@@ -93,6 +95,8 @@ class GalerkinAttention(nn.Module):
         
         self.norm_K = self._get_layernorm(self.d_k, self.heads, eps=eps)
         self.norm_V = self._get_layernorm(self.d_k, self.heads, eps=eps)
+        
+        # TODO active ETC
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
         b = x.size(0)
@@ -103,7 +107,7 @@ class GalerkinAttention(nn.Module):
             q, k = weight*q, weight*k
     
         if self.head_pos is not None:
-           q, k = self.head_pos(q, k)
+           q, k = self.head_pos(q, k, pos, self.heads)
            
         if self.norm:
             k = torch.stack(
@@ -112,21 +116,18 @@ class GalerkinAttention(nn.Module):
             v = torch.stack(
                         [norm(x) for norm, x in
                         zip(self.norm_V, (v[:, i, ...] for i in range(self.heads)))], dim=1)   
-            
-        if pos is not None and self.pos_dim > 0:
-            assert pos.size(-1) == self.pos_dim
-            pos = pos.unsqueeze(1)
-            pos = pos.repeat([1, self.n_head, 1, 1])
-            query, key, value = [torch.cat([pos, x], dim=-1)
-                                 for x in (query, key, value)]
         
         seq_len = q.size(-2)
-        scores = torch.matmul(k.transpose(-2, -1), v)
+        dots = torch.matmul(k.transpose(-2, -1), v)
+
+        if self.dot_pos is not None:
+            raise "NOT IMPLEMENTED"
 
         if mask is not None:
+            # TODO
             raise RuntimeError("linear attention does not support casual mask.")
 
-        p_attn = scores / seq_len
+        p_attn = dots / seq_len
 
         p_attn = self.dropout(p_attn)
 

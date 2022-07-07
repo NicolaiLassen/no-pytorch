@@ -40,7 +40,7 @@ class RoPE(nn.Module):
                                           num_freqs,
                                           learned_freq
                                           )
-    def forward(self, q: torch.Tensor, k: torch.Tensor):
+    def forward(self, q: torch.Tensor, k: torch.Tensor, **kwargs):
         q = self.rotary_emb.rotate_queries_or_keys(q)
         k = self.rotary_emb.rotate_queries_or_keys(k)
         return q, k
