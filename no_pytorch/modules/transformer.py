@@ -111,17 +111,15 @@ class GalerkinTransformer(nn.Module):
         self.attention_layers = []
         for _ in range(depth):
             self.layers.append(nn.ModuleList([
-                PreNorm(dim, 
-                       GalerkinAttention(
+                GalerkinAttention(
                                 dim=dim,
                                 heads=heads,
                                 dim_head=dim_head,
                                 rel_pos=rel_pos(dim_head),
                                 init=attn_init,
                                 diagonal_weight=diagonal_weight
-                            )
-                        ),
-                PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout))
+                            ),
+                FeedForward(dim, mlp_dim, dropout = dropout)
             ]))
     
     def forward(self, x: torch.Tensor, mask=None):
