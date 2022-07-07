@@ -52,6 +52,15 @@ class FeedForward(nn.Module):
         x = self.fc_out(x)
         return x
 
+class CrossAttentionTransformer(nn.Module):
+    def __init__(self):
+        super(CrossAttentionTransformer
+    , self).__init__()
+
+    def forward(self, x):
+        raise "NOT IMPLEMENTED"
+        return x
+    
 class FourierTransformer(nn.Module):
     def __init__(self,
                 dim=64,
@@ -80,7 +89,6 @@ class FourierTransformer(nn.Module):
                                 dot_pos=None if dot_pos is None else dot_pos,  
                                 init=attn_init,
                                 dropout=att_dropout,
-                                diagonal_weight=1e-2,
                                 symmetric_init=False,
                                 diagonal_weight=diagonal_weight
                             ),
@@ -121,7 +129,6 @@ class GalerkinTransformer(nn.Module):
                                 dot_pos=None if dot_pos is None else dot_pos,  
                                 init=attn_init,
                                 dropout=att_dropout,
-                                diagonal_weight=1e-2,
                                 symmetric_init=False,
                                 diagonal_weight=diagonal_weight
                             ),
@@ -132,13 +139,4 @@ class GalerkinTransformer(nn.Module):
         for att, ff in self.attention_layers:
             x = att(x, mask=mask) + x
             x = ff(x) + x
-        return x
-    
-class CrossAttentionTransformer(nn.Module):
-    def __init__(self):
-        super(CrossAttentionTransformer
-    , self).__init__()
-
-    def forward(self, x):
-        raise "NOT IMPLEMENTED"
         return x
