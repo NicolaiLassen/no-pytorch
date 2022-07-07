@@ -40,6 +40,7 @@ class FourierAttention(nn.Module):
         
         self.d_k = dim // heads
         self.heads = heads
+        self.dim_head = dim_head
         inner_dim = dim_head *  heads    
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
         
@@ -59,16 +60,18 @@ class FourierAttention(nn.Module):
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
         b = x.size(0)
-        qkv = self.to_qkv(x).chunk(3, dim = -1)        
+        qkv= self.to_qkv(x).chunk(3, dim = -1)
+        
+        if self.qkv_pos is not None:
+           assert self.dim_head == self.qkv_pos.dim
+           qkv = self.qkv_pos(*qkv, pos, self.heads)
+           
         q, k, v = \
             map(lambda t:  rearrange(t, 'b n (h k d) -> b h (n d) k', h = self.heads, k=self.d_k), qkv)
         
         if weight is not None:
             q, k = weight*q, weight*k
-    
-        if self.qkv_pos is not None:
-           q, k = self.qkv_pos(q, k, v, pos, self.heads)
-           
+
         if self.norm:
             k = torch.stack(
                         [norm(x) for norm, x in
@@ -125,6 +128,7 @@ class GalerkinAttention(nn.Module):
         
         self.d_k = dim // heads
         self.heads = heads
+        self.dim_head = dim_head
         inner_dim = dim_head *  heads    
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
         
@@ -144,16 +148,18 @@ class GalerkinAttention(nn.Module):
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
         b = x.size(0)
-        qkv = self.to_qkv(x).chunk(3, dim = -1)        
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        
+        if self.qkv_pos is not None:
+           assert self.dim_head == self.qkv_pos.dim
+           qkv = self.qkv_pos(*qkv, pos, self.heads)
+        
         q, k, v = \
             map(lambda t:  rearrange(t, 'b n (h k d) -> b h (n d) k', h = self.heads, k=self.d_k), qkv)
         
         if weight is not None:
             q, k = weight*q, weight*k
     
-        if self.qkv_pos is not None:
-           q, k = self.qkv_pos(q, k, v, pos, self.heads)
-           
         if self.norm:
             k = torch.stack(
                         [norm(x) for norm, x in

@@ -32,6 +32,7 @@ class RoPE(nn.Module):
                 learned_freq = False
         ):
         super(RoPE, self).__init__()
+        self.dim = dim
         self.rotary_emb = RotaryEmbedding(dim,
                                           custom_freqs,
                                           freqs_for,
@@ -40,10 +41,10 @@ class RoPE(nn.Module):
                                           num_freqs,
                                           learned_freq
                                           )
-    def forward(self, q: torch.Tensor, k: torch.Tensor, **kwargs):
+    def forward(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor, *args):
         q = self.rotary_emb.rotate_queries_or_keys(q)
         k = self.rotary_emb.rotate_queries_or_keys(k)
-        return q, k
+        return q, k, v
 
 class DynamicPositionBias(nn.Module):
     def __init__(self, dim, *, heads, depth, log_distance = False, norm = False):
