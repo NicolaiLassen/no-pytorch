@@ -10,7 +10,6 @@ import torch
 import torch.nn as nn
 from torch.nn.init import xavier_normal_
 from .attention import FourierAttention, GalerkinAttention, CrossAttention
-from .pos import RoPE, Grid
 from .functional import default
 
 class FeedForward(nn.Module):
@@ -71,11 +70,9 @@ class FourierTransformer(nn.Module):
                 dropout=0.1,
                 att_dropout=0,
                 fc_dropout=0,
-                diagonal_weight=1e-2,
                 symmetric_init=False,
                 qkv_pos=None,
-                dot_pos=None,
-                attn_init=xavier_normal_
+                dot_pos=None
         ):
         super(FourierTransformer, self).__init__()
         
@@ -87,12 +84,10 @@ class FourierTransformer(nn.Module):
                                 heads=heads,
                                 dim_head=dim_head,
                                 qkv_pos=None if qkv_pos is None else qkv_pos,
-                                dot_pos=None if dot_pos is None else dot_pos,  
-                                init=attn_init,
+                                dot_pos=None if dot_pos is None else dot_pos,
                                 fc_dropout=fc_dropout,
                                 attn_dropout=att_dropout,
-                                symmetric_init=symmetric_init,
-                                diagonal_weight=diagonal_weight
+                                symmetric_init=symmetric_init
                             ),
                 FeedForward(dim, mlp_dim, dropout = dropout)
             ]))
@@ -116,8 +111,7 @@ class GalerkinTransformer(nn.Module):
                 diagonal_weight=1e-2,
                 symmetric_init=False,
                 qkv_pos=None,
-                dot_pos=None,
-                attn_init=xavier_normal_
+                dot_pos=None
         ):
         super(GalerkinTransformer, self).__init__()
         
@@ -129,12 +123,10 @@ class GalerkinTransformer(nn.Module):
                                 heads=heads,
                                 dim_head=dim_head,
                                 qkv_pos=None if qkv_pos is None else qkv_pos,
-                                dot_pos=None if dot_pos is None else dot_pos,  
-                                init=attn_init,
+                                dot_pos=None if dot_pos is None else dot_pos,
                                 fc_dropout=fc_dropout,
                                 attn_dropout=att_dropout,
-                                symmetric_init=symmetric_init,
-                                diagonal_weight=diagonal_weight
+                                symmetric_init=symmetric_init
                             ),
                 FeedForward(dim, mlp_dim, dropout = dropout)
             ]))

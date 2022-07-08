@@ -20,7 +20,6 @@ class SpectralConv1d(nn.Module):
                  modes=12,
                  dropout=0.01,
                  norm='ortho',
-                 init=xavier_normal_,
                  activation=nn.SiLU,
                  return_freq=False  
         ):
@@ -42,7 +41,7 @@ class SpectralConv1d(nn.Module):
         self.fourier_weight = nn.Parameter(torch.rand(in_channels, out_channels, self.modes_x, dtype=torch.cfloat))
         
         for param in self.fourier_weight:
-            init(param, gain=scale * torch.sqrt(torch.tensor(in_channels+out_channels)))
+            xavier_normal_(param, gain=scale * torch.sqrt(torch.tensor(in_channels+out_channels)))
         
     @staticmethod
     def compl_mul1d(input, weights):
@@ -81,7 +80,6 @@ class SpectralConv2d(nn.Module):
                  modes=12,
                  dropout=0.01,
                  norm='ortho',
-                 init=xavier_normal_,
                  activation=nn.SiLU,
                  return_freq=False
         ):
@@ -105,7 +103,7 @@ class SpectralConv2d(nn.Module):
                                                 for _ in range(2)])
         
         for param in self.fourier_weight:
-            init(param, gain=scale * torch.sqrt(torch.tensor(in_channels+out_channels)))
+            xavier_normal_(param, gain=scale * torch.sqrt(torch.tensor(in_channels+out_channels)))
         
     @staticmethod
     def compl_mul2d(input, weights):
@@ -148,7 +146,6 @@ class SpectralConv3d(nn.Module):
                  modes=12,
                  dropout=0.01,
                  norm='ortho',
-                 init=xavier_normal_,
                  activation=nn.SiLU,
                  return_freq=False
                  ):
@@ -170,9 +167,9 @@ class SpectralConv3d(nn.Module):
         self.fourier_weight = nn.ParameterList([nn.Parameter(
             torch.rand(in_channels, out_channels, self.modes_x, self.modes_y, self.modes_z, dtype=torch.cfloat)) 
                                                 for _ in range(4)])
-        
+    
         for param in self.fourier_weight:
-            init(param, gain=scale * torch.sqrt(torch.tensor(in_channels+out_channels)))
+            xavier_normal_(param, gain=scale * torch.sqrt(torch.tensor(in_channels+out_channels)))
         
     # Complex multiplication
     def compl_mul3d(self, input, weights):

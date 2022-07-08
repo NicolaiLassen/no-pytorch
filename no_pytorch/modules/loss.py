@@ -171,24 +171,6 @@ class WeightedL2Loss2d(nn.Module):
             targets = targets * (1.0 + noise*torch.rand_like(targets))
         return targets
 
-    def central_diff(self, u: torch.Tensor, h=None):
-        '''
-        u: function defined on a grid (bsz, n, n)
-        out: gradient (N, n-2, n-2, 2)
-        '''
-        bsz = u.size(0)
-        h = self.h if h is None else h
-        d = self.dilation  # central diff dilation
-        s = d // 2  # central diff stride
-        if self.dim > 2:
-            raise NotImplementedError(
-                "Not implemented: dim > 2 not implemented")
-
-        grad_x = (u[:, d:, s:-s] - u[:, :-d, s:-s])/d
-        grad_y = (u[:, s:-s, d:] - u[:, s:-s, :-d])/d
-        grad = torch.stack([grad_x, grad_y], dim=-1)
-        return grad/h
-
     def forward(self, preds, targets,
                 preds_prime=None, targets_prime=None,
                 weights=None, K=None):
@@ -235,7 +217,7 @@ class WeightedL2Loss2d(nn.Module):
         loss = loss.sqrt().mean() if self.return_norm else loss.mean()
 
         if self.regularizer and targets_prime is not None:
-            preds_diff = self.central_diff(preds)
+            preds_diff = torch.gradient(preds)
             s = self.dilation // 2
             targets_prime = targets_prime[:, s:-s, s:-s, :].contiguous()
 

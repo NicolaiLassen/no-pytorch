@@ -30,8 +30,7 @@ class FourierAttention(nn.Module):
                  dim_head=64,
                  fc_dropout=0.01,
                  attn_dropout=0.01,
-                 init=xavier_normal_,
-                 diagonal_weight=1e-2,
+                 xavier_init=1e-4,
                  symmetric_init=False,
                  norm=True,
                  eps=1e-5,
@@ -41,9 +40,11 @@ class FourierAttention(nn.Module):
         
         self.heads = heads
         self.dim_head = dim_head
-        inner_dim = dim_head *  heads    
+        inner_dim = dim_head *  heads        
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
         
+        self.symmetric_init = symmetric_init
+        self.xavier_init = xavier_init
         self.qkv_pos = qkv_pos
         self.dot_pos = dot_pos
         
@@ -61,7 +62,7 @@ class FourierAttention(nn.Module):
             nn.Dropout(fc_dropout)
         )
         
-        # TODO active ETC
+        self._init_parameters()
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
         qkv= self.to_qkv(x).chunk(3, dim = -1)
@@ -111,6 +112,16 @@ class FourierAttention(nn.Module):
             return out, p_attn
         return  out          
     
+    def _init_parameters(self):
+        for param in self.to_qkv.parameters():
+            xavier_normal_(param, gain=self.xavier_init)
+            if self.diagonal_weight > 0.0:
+                param.data += self.diagonal_weight * \
+                    torch.diag(torch.ones(
+                        param.size(-1), dtype=torch.float))
+            if self.symmetric_init:
+                param.data += param.data.T
+    
     @staticmethod
     def _get_layernorm(normalized_dim, n_head, **kwargs):
         return nn.ModuleList(
@@ -126,8 +137,7 @@ class GalerkinAttention(nn.Module):
                  dim_head=64,
                  fc_dropout=0.01,
                  attn_dropout=0.01,
-                 init=xavier_normal_,
-                 diagonal_weight=1e-2,
+                 xavier_init=1e-4,
                  symmetric_init=False,
                  norm=True,
                  eps=1e-5,
@@ -140,6 +150,8 @@ class GalerkinAttention(nn.Module):
         inner_dim = dim_head *  heads        
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
         
+        self.symmetric_init = symmetric_init
+        self.xavier_init = xavier_init
         self.qkv_pos = qkv_pos
         self.dot_pos = dot_pos
         
@@ -157,7 +169,7 @@ class GalerkinAttention(nn.Module):
             nn.Dropout(fc_dropout)
         )
         
-        # TODO active ETC
+        self._init_parameters()
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
         qkv = self.to_qkv(x).chunk(3, dim = -1)
@@ -208,6 +220,12 @@ class GalerkinAttention(nn.Module):
             return out, p_attn
         return  out      
     
+    def _init_parameters(self):
+        for param in self.to_qkv.parameters():
+            xavier_normal_(param, gain=self.xavier_init)
+            if self.symmetric_init:
+                param.data += param.data.T
+     
     @staticmethod
     def _get_layernorm(normalized_dim, n_head, **kwargs):
         return nn.ModuleList(

@@ -5,7 +5,7 @@ import torch.nn as nn
 from einops import rearrange
 from no_pytorch import GalerkinTransformer, FourierTransformer, FNO2d, RoPE
 
-x = torch.rand(1, 10, 64, 64).cuda()
+x = torch.rand(1, 10, 32, 32).cuda()
 
 class Net(nn.Module):
     """Some Information about Net"""
@@ -27,6 +27,6 @@ class Net(nn.Module):
 
 model = Net().cuda()
 # in [x_0, x_1 ... x_10] out x_10+1
-x_hat = model(x) # (1, 1, 64, 64)
 
+x_hat = model(x) # (1, 1, 64, 64)
 print(x_hat.shape)
