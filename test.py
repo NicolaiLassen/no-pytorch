@@ -13,14 +13,14 @@ class Net(nn.Module):
         super(Net, self).__init__()
         
         self.proj = nn.Conv2d(10, 64, 1)
-        self.hilbert = GalerkinTransformer(dim=64, qkv_pos=RoPE(256), dim_head=256, depth=12)
+        self.petrov_galerkin = GalerkinTransformer(dim=64, qkv_pos=RoPE(256), dim_head=256, depth=12)
         self.fourier = FNO2d(in_channels=64, out_channels=1, freq_dim=20, depth=8)
         
     def forward(self, x):
         w, h = x.shape[2:]
         x = self.proj(x)
         x = rearrange(x, 'b c w h -> b (w h) c')
-        x = self.hilbert(x)
+        x = self.petrov_galerkin(x)
         x = rearrange(x, 'b (w h) c -> b c w h', w=w, h=h)
         x = self.fourier(x)
         return x
