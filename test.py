@@ -13,7 +13,7 @@ class Net(nn.Module):
         super(Net, self).__init__()
         
         self.proj = nn.Conv2d(10, 64, 1)
-        self.petrov_galerkin = GalerkinTransformer(dim=64, qkv_pos=RoPE(64), dim_head=64, depth=1)
+        self.petrov_galerkin = GalerkinTransformer(dim=64, qkv_pos=RoPE(16), dim_head=16, depth=1)
         self.fourier = FNO2d(in_channels=64, out_channels=1, freq_dim=20, depth=1)
         
     def forward(self, x):
