@@ -28,7 +28,8 @@ class FourierAttention(nn.Module):
                  pos_dim: int = 1,
                  heads=8,
                  dim_head=64,
-                 dropout=0.1,
+                 fc_dropout=0.01,
+                 attn_dropout=0.01,
                  init=xavier_normal_,
                  diagonal_weight=1e-2,
                  symmetric_init=False,
@@ -38,7 +39,6 @@ class FourierAttention(nn.Module):
                  ):
         super(FourierAttention, self).__init__()
         
-        self.d_k = dim // heads
         self.heads = heads
         self.dim_head = dim_head
         inner_dim = dim_head *  heads    
@@ -51,15 +51,19 @@ class FourierAttention(nn.Module):
         self.norm = norm
         
         self.return_att = return_att
-        self.dropout = nn.Dropout(dropout)
+        self.attn_dropout = nn.Dropout(attn_dropout)
         
-        self.norm_K = self._get_layernorm(self.d_k, self.heads, eps=eps)
-        self.norm_Q = self._get_layernorm(self.d_k, self.heads, eps=eps)
+        self.norm_K = self._get_layernorm(dim_head, self.heads, eps=eps)
+        self.norm_Q = self._get_layernorm(dim_head, self.heads, eps=eps)
+        
+        self.to_out = nn.Sequential(
+            nn.Linear(inner_dim, dim),
+            nn.Dropout(fc_dropout)
+        )
         
         # TODO active ETC
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
-        b = x.size(0)
         qkv= self.to_qkv(x).chunk(3, dim = -1)
         
         if self.qkv_pos is not None:
@@ -68,7 +72,10 @@ class FourierAttention(nn.Module):
            qkv = self.qkv_pos(*qkv, pos, self.heads)
            
         q, k, v = \
-            map(lambda t:  rearrange(t, 'b n (h k d) -> b h (n d) k', h = self.heads, k=self.d_k), qkv)
+            map(lambda t:  
+                rearrange(t, 'b n (h k d) -> b (n d) h k', h=self.heads, k=self.dim_head)
+                .transpose(1, 2)
+            , qkv)
         
         if weight is not None:
             q, k = weight*q, weight*k
@@ -82,7 +89,7 @@ class FourierAttention(nn.Module):
                         zip(self.norm_Q, (q[:, i, ...] for i in range(self.heads)))], dim=1)   
         
         seq_len = q.size(-2)
-        dots = torch.matmul(q, k.transpose(-2, -1)) / torch.sqrt(torch.tensor(self.d_k))
+        dots = torch.matmul(q, k.transpose(-2, -1)) / torch.sqrt(torch.tensor(self.dim_head))
 
         if self.dot_pos is not None:
             raise "NOT IMPLEMENTED"
@@ -92,13 +99,13 @@ class FourierAttention(nn.Module):
 
         p_attn = dots / seq_len
 
-        p_attn = self.dropout(p_attn)
+        p_attn = self.attn_dropout(p_attn)
 
         out = torch.matmul(p_attn, v)
         
-        out_dim = self.heads * self.d_k if pos is None else self.heads * (self.d_k + self.pos_dim)
-         
-        out = x.transpose(1, 2).contiguous().view(b, -1, out_dim)
+        out = rearrange(out.transpose(1, 2).contiguous(), 'b d h k -> b d (h k)')
+        
+        out = self.to_out(out)
         
         if self.return_att:
             return out, p_attn
@@ -117,7 +124,8 @@ class GalerkinAttention(nn.Module):
                  pos_dim: int = 1,
                  heads=8,
                  dim_head=64,
-                 dropout=0.1,
+                 fc_dropout=0.01,
+                 attn_dropout=0.01,
                  init=xavier_normal_,
                  diagonal_weight=1e-2,
                  symmetric_init=False,
@@ -127,10 +135,9 @@ class GalerkinAttention(nn.Module):
                  ):
         super(GalerkinAttention, self).__init__()
         
-        self.d_k = dim // heads
         self.heads = heads
         self.dim_head = dim_head
-        inner_dim = dim_head *  heads    
+        inner_dim = dim_head *  heads        
         self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
         
         self.qkv_pos = qkv_pos
@@ -140,15 +147,19 @@ class GalerkinAttention(nn.Module):
         self.norm = norm
         
         self.return_att = return_att
-        self.dropout = nn.Dropout(dropout)
+        self.attn_dropout = nn.Dropout(attn_dropout)
         
-        self.norm_K = self._get_layernorm(self.d_k, self.heads, eps=eps)
-        self.norm_V = self._get_layernorm(self.d_k, self.heads, eps=eps)
+        self.norm_K = self._get_layernorm(self.dim_head, self.heads, eps=eps)
+        self.norm_V = self._get_layernorm(self.dim_head, self.heads, eps=eps)
+        
+        self.to_out = nn.Sequential(
+            nn.Linear(inner_dim, dim),
+            nn.Dropout(fc_dropout)
+        )
         
         # TODO active ETC
 
     def forward(self, x: torch.Tensor, pos: torch.Tensor=None, mask: torch.Tensor=None, weight: torch.Tensor=None):
-        b = x.size(0)
         qkv = self.to_qkv(x).chunk(3, dim = -1)
         
         if self.qkv_pos is not None:
@@ -157,7 +168,10 @@ class GalerkinAttention(nn.Module):
             qkv = self.qkv_pos(*qkv, pos, self.heads)
         
         q, k, v = \
-            map(lambda t:  rearrange(t, 'b n (h k d) -> b h (n d) k', h = self.heads, k=self.d_k), qkv)
+            map(lambda t:  
+                rearrange(t, 'b n (h k d) -> b (n d) h k', h=self.heads, k=self.dim_head)
+                .transpose(1, 2)
+            , qkv)
         
         if weight is not None:
             q, k = weight*q, weight*k
@@ -182,13 +196,13 @@ class GalerkinAttention(nn.Module):
 
         p_attn = dots / seq_len
 
-        p_attn = self.dropout(p_attn)
+        p_attn = self.attn_dropout(p_attn)
 
         out = torch.matmul(q, p_attn)
         
-        out_dim = self.heads * self.d_k if pos is None else self.heads * (self.d_k + self.pos_dim)
-         
-        out = x.transpose(1, 2).contiguous().view(b, -1, out_dim)
+        out = rearrange(out.transpose(1, 2).contiguous(), 'b d h k -> b d (h k)')
+        
+        out = self.to_out(out)
         
         if self.return_att:
             return out, p_attn

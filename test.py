@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 from einops import rearrange
-from no_pytorch import GalerkinTransformer, FNO2d, RoPE
+from no_pytorch import GalerkinTransformer, FourierTransformer, FNO2d, RoPE
 
 x = torch.rand(1, 10, 64, 64).cuda()
 
@@ -13,8 +13,8 @@ class Net(nn.Module):
         super(Net, self).__init__()
         
         self.proj = nn.Conv2d(10, 64, 1)
-        self.petrov_galerkin = GalerkinTransformer(dim=64, qkv_pos=RoPE(256), dim_head=256, depth=12)
-        self.fourier = FNO2d(in_channels=64, out_channels=1, freq_dim=20, depth=8)
+        self.petrov_galerkin = GalerkinTransformer(dim=64, qkv_pos=RoPE(64), dim_head=64, depth=1)
+        self.fourier = FNO2d(in_channels=64, out_channels=1, freq_dim=20, depth=1)
         
     def forward(self, x):
         w, h = x.shape[2:]
@@ -29,4 +29,4 @@ model = Net().cuda()
 # in [x_0, x_1 ... x_10] out x_10+1
 x_hat = model(x) # (1, 1, 64, 64)
 
-print(x_hat)
+print(x_hat.shape)
