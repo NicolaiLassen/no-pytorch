@@ -91,7 +91,7 @@ class FourierTransformer(nn.Module):
                                 init=attn_init,
                                 fc_dropout=fc_dropout,
                                 attn_dropout=att_dropout,
-                                symmetric_init=False,
+                                symmetric_init=symmetric_init,
                                 diagonal_weight=diagonal_weight
                             ),
                 FeedForward(dim, mlp_dim, dropout = dropout)
@@ -133,7 +133,7 @@ class GalerkinTransformer(nn.Module):
                                 init=attn_init,
                                 fc_dropout=fc_dropout,
                                 attn_dropout=att_dropout,
-                                symmetric_init=False,
+                                symmetric_init=symmetric_init,
                                 diagonal_weight=diagonal_weight
                             ),
                 FeedForward(dim, mlp_dim, dropout = dropout)
