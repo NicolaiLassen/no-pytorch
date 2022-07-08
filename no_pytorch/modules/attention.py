@@ -115,10 +115,6 @@ class FourierAttention(nn.Module):
     def _init_parameters(self):
         for param in self.to_qkv.parameters():
             xavier_normal_(param, gain=self.xavier_init)
-            if self.diagonal_weight > 0.0:
-                param.data += self.diagonal_weight * \
-                    torch.diag(torch.ones(
-                        param.size(-1), dtype=torch.float))
             if self.symmetric_init:
                 param.data += param.data.T
     
