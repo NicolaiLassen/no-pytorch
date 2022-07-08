@@ -27,10 +27,9 @@ class FNO1d(nn.Module):
         ):
         super(FNO1d, self).__init__()
         
-        _grid_size = 1
+        _grid_size =  1 if grid else 0
         self.grid = grid
-        if grid:
-            self.project = nn.Conv1d(in_channels + _grid_size, freq_dim, 1)
+        self.project = nn.Conv1d(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
         for _ in range(depth):
@@ -57,7 +56,8 @@ class FNO1d(nn.Module):
         if self.grid:
             grid = get_grid_1d(x.shape, x.device)
             x = torch.cat((x, grid), dim=1)
-            x = self.project(x)
+        
+        x = self.project(x)
         
         for spectral_layer in self.spectral_layers:
             x = spectral_layer(x)
@@ -85,10 +85,9 @@ class FNO2d(nn.Module):
         ):
         super(FNO2d, self).__init__()
 
-        _grid_size = 2
+        _grid_size = 2 if grid else 0
         self.grid = grid
-        if grid:
-            self.project = nn.Conv2d(in_channels + _grid_size, freq_dim, 1)
+        self.project = nn.Conv2d(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
         for _ in range(depth):
@@ -115,7 +114,8 @@ class FNO2d(nn.Module):
         if self.grid:
             grid = get_grid_2d(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=1)
-            x = self.project(x)
+        
+        x = self.project(x)
         
         for spectral_layer in self.spectral_layers:
             x = spectral_layer(x)
@@ -143,10 +143,9 @@ class FNO3d(nn.Module):
         ):
         super(FNO3d, self).__init__()
 
-        _grid_size = 3
+        _grid_size = 3 if grid else 0
         self.grid = grid
-        if grid:
-            self.project = nn.Conv3d(in_channels + _grid_size, freq_dim, 1)
+        self.project = nn.Conv3d(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
         for _ in range(depth):
@@ -173,7 +172,8 @@ class FNO3d(nn.Module):
         if self.grid:
             grid = get_grid_3d(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=1)
-            x = self.project(x)
+        
+        x = self.project(x)
         
         for spectral_layer in self.spectral_layers:
             x = spectral_layer(x)

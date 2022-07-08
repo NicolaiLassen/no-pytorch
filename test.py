@@ -14,7 +14,7 @@ class Net(nn.Module):
         
         self.proj = nn.Conv2d(10, 64, 1)
         self.petrov_galerkin = GalerkinTransformer(dim=64, qkv_pos=RoPE(16), dim_head=16, depth=1)
-        self.fourier = FNO2d(in_channels=64, out_channels=1, freq_dim=20, depth=1)
+        self.fourier = FNO2d(in_channels=64, out_channels=1, freq_dim=20, depth=1, grid=False)
         
     def forward(self, x):
         w, h = x.shape[2:]
@@ -29,3 +29,4 @@ model = Net()
 
 # in [x_0, x_1 ... x_10] out x_10+1
 x_hat = model(x) # (1, 1, 64, 64)
+print(x_hat)
