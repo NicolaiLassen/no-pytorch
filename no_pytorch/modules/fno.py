@@ -29,7 +29,7 @@ class FNO1d(nn.Module):
         
         _grid_size =  1 if grid else 0
         self.grid = grid
-        self.project = nn.Conv1d(in_channels + _grid_size, freq_dim, 1)
+        self.project = nn.Linear(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
         for _ in range(depth):
@@ -55,18 +55,14 @@ class FNO1d(nn.Module):
         # field and bound grid
         if self.grid:
             grid = get_grid_1d(x.shape, x.device)
-            x = torch.cat((x, grid), dim=1)
+            x = torch.cat((x, grid), dim=-1)
         
         x = self.project(x)
         
         for spectral_layer in self.spectral_layers:
             x = spectral_layer(x)
         
-        x = rearrange(x, "b c w -> b w c")
-        
         x = self.fc_out(x)
-        
-        x = rearrange(x, "b w c -> b c w")
         
         return x
 
@@ -87,7 +83,7 @@ class FNO2d(nn.Module):
 
         _grid_size = 2 if grid else 0
         self.grid = grid
-        self.project = nn.Conv2d(in_channels + _grid_size, freq_dim, 1)
+        self.project = nn.Linear(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
         for _ in range(depth):
@@ -113,18 +109,14 @@ class FNO2d(nn.Module):
         # field and bound grid
         if self.grid:
             grid = get_grid_2d(x.shape, x.device) if grid is None else grid
-            x = torch.cat((x, grid), dim=1)
+            x = torch.cat((x, grid), dim=-1)
         
         x = self.project(x)
         
         for spectral_layer in self.spectral_layers:
             x = spectral_layer(x)
-        
-        x = rearrange(x, "b c w h -> b w h c")
-        
+            
         x = self.fc_out(x)
-        
-        x = rearrange(x, "b w h c -> b c w h")
         
         return x
     
@@ -145,7 +137,7 @@ class FNO3d(nn.Module):
 
         _grid_size = 3 if grid else 0
         self.grid = grid
-        self.project = nn.Conv3d(in_channels + _grid_size, freq_dim, 1)
+        self.project = nn.Linear(in_channels + _grid_size, freq_dim, 1)
         
         self.spectral_layers = nn.ModuleList([])
         for _ in range(depth):
@@ -171,17 +163,13 @@ class FNO3d(nn.Module):
         # field and bound grid
         if self.grid:
             grid = get_grid_3d(x.shape, x.device) if grid is None else grid
-            x = torch.cat((x, grid), dim=1)
+            x = torch.cat((x, grid), dim=-1)
         
         x = self.project(x)
         
         for spectral_layer in self.spectral_layers:
             x = spectral_layer(x)
-        
-        x = rearrange(x, "b c w h d -> b w h d c")
-        
+         
         x = self.fc_out(x)
-        
-        x = rearrange(x, "b w h d c -> b c w h d")
         
         return x

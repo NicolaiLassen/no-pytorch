@@ -34,7 +34,7 @@ class SpectralConv1d(nn.Module):
         self.return_freq = return_freq
         
         self.activation = activation()
-        self.shortcut = nn.Conv1d(in_channels, out_channels, 1)
+        self.shortcut = nn.Linear(in_channels, out_channels, 1)
         self.dropout =  nn.Dropout(dropout)
 
         scale = (1 / (in_channels * out_channels))
@@ -49,22 +49,26 @@ class SpectralConv1d(nn.Module):
         return torch.einsum("bix,iox->box", input, weights)
 
     def forward(self, x: torch.Tensor):
-        b, _, w = x.shape
+        b, w = x.shape[:-1]
         
         assert self.modes_x <= w // 2 + 1, "Modes should be smaller than w // 2 + 1"
         
         res = self.shortcut(x)
         x = self.dropout(x)
         
+        x = x.permute(0, 2, 1)
+        
         # compute fourier coeffcients up to factor of e^(- constant)
-        x_ft = fft.rfft(x, norm=self.norm, dim=-1)
+        x_ft = fft.rfft(x, norm=self.norm)
         
         # multiply relevant fourier modes
         out_ft = torch.zeros(b, self.out_channels, self.modes_x, dtype=torch.cfloat, device=x.device)
         out_ft[:, :, :self.modes_x] = self.compl_mul1d(x_ft[:, :, :self.modes_x], self.fourier_weight)
         
         # return to physical space
-        x = fft.irfft(out_ft, n=w, norm=self.norm, dim=-1)
+        x = fft.irfft(out_ft, n=w, norm=self.norm)
+        
+        x = x.permute(0, 2, 1)
         
         x = self.activation(x + res)
               
@@ -94,7 +98,7 @@ class SpectralConv2d(nn.Module):
         self.return_freq = return_freq
     
         self.activation = activation()
-        self.shortcut = nn.Conv2d(in_channels, out_channels, 1)
+        self.shortcut = nn.Linear(in_channels, out_channels, 1)
         self.dropout =  nn.Dropout(dropout)
 
         scale = (1 / (in_channels * out_channels))
@@ -111,7 +115,7 @@ class SpectralConv2d(nn.Module):
         return torch.einsum("bixy,ioxy->boxy", input, weights)
 
     def forward(self, x: torch.Tensor):
-        b, _, w, h = x.shape
+        b, w, h = x.shape[:-1]
         
         assert self.modes_x <= w, "Modes x should be smaller than w"
         assert self.modes_y <= h // 2 + 1, "Modes y should be smaller than h // 2 + 1"
@@ -119,8 +123,10 @@ class SpectralConv2d(nn.Module):
         res = self.shortcut(x)
         x = self.dropout(x)
         
+        x = x.permute(0, 3, 1, 2)
+
         # multiply relevant fourier modes
-        x_ft = fft.rfft2(x, s=(w, h), norm=self.norm, dim=(-2, -1))
+        x_ft = fft.rfft2(x, s=(w, h), norm=self.norm)
 
         # multiply relevant fourier modes
         out_ft = torch.zeros(b, self.out_channels,  self.modes_x, self.modes_y, dtype=torch.cfloat, device=x.device)
@@ -130,7 +136,9 @@ class SpectralConv2d(nn.Module):
             self.compl_mul2d(x_ft[:, :, -self.modes_x:, :self.modes_y], self.fourier_weight[1])
             
         # return to physical space
-        x = fft.irfft2(out_ft, s=(w, h), norm=self.norm, dim=(-2, -1))
+        x = fft.irfft2(out_ft, s=(w, h), norm=self.norm)
+
+        x = x.permute(0, 2, 3, 1)        
         
         x = self.activation(x + res)      
         
@@ -160,7 +168,7 @@ class SpectralConv3d(nn.Module):
         self.return_freq = return_freq
     
         self.activation = activation()
-        self.shortcut = nn.Conv3d(in_channels, out_channels, 1)
+        self.shortcut = nn.Linear(in_channels, out_channels, 1)
         self.dropout =  nn.Dropout(dropout)
 
         scale = (1 / (in_channels * out_channels))
@@ -177,7 +185,7 @@ class SpectralConv3d(nn.Module):
         return torch.einsum("bixyz,ioxyz->boxyz", input, weights)
 
     def forward(self, x):
-        b, _, w, h, d = x.shape
+        b, w, h, d = x.shape[:-1]
         
         assert self.modes_x <= w, "Modes x should be smaller than w"
         assert self.modes_y <= h, "Modes y should be smaller than h"
@@ -185,6 +193,8 @@ class SpectralConv3d(nn.Module):
         
         res = self.shortcut(x)
         x = self.dropout(x)
+        
+        x = x.permute(0, 4, 1, 2, 3)
         
         # compute Fourier coeffcients up to factor of e^(- something constant)
         x_ft = torch.fft.rfftn(x, dim=[-3,-2,-1])
@@ -203,6 +213,8 @@ class SpectralConv3d(nn.Module):
 
         # return to physical space
         x = torch.fft.irfftn(out_ft, s=(w, h, d))
+        
+        x = x.permute(0, 2, 3, 4, 1)
         
         x = self.activation(x + res)      
         
