@@ -52,7 +52,6 @@ class FNO1d(nn.Module):
 
     def forward(self, x: torch.Tensor):
         
-        # field and bound grid
         if self.grid:
             grid = get_grid_1d(x.shape, x.device)
             x = torch.cat((x, grid), dim=-1)
@@ -106,7 +105,6 @@ class FNO2d(nn.Module):
 
     def forward(self, x: torch.Tensor, grid=None):
         
-        # field and bound grid
         if self.grid:
             grid = get_grid_2d(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=-1)
@@ -160,7 +158,6 @@ class FNO3d(nn.Module):
 
     def forward(self, x: torch.Tensor, grid=None):
         
-        # field and bound grid
         if self.grid:
             grid = get_grid_3d(x.shape, x.device) if grid is None else grid
             x = torch.cat((x, grid), dim=-1)

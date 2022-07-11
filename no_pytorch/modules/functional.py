@@ -2,28 +2,28 @@ import torch
 import torch.nn.functional as F
 
 def get_grid_1d(shape, device):
-    b, size_x = shape[0], shape[2]
+    b, size_x = shape[:-1]
     grid_x = torch.linspace(0, 1, size_x, dtype=torch.float)
-    grid_x = grid_x.reshape(1, 1, size_x).repeat([b, 1, 1])
+    grid_x = grid_x.reshape(1, size_x, 1).repeat([b, 1, 1])
     return grid_x.to(device)
 
 def get_grid_2d(shape, device):
-    b, _, size_x, size_y = shape
+    b, size_x, size_y = shape[:-1]
     grid_x = torch.linspace(0, 1, size_x, dtype=torch.float)
-    grid_x = grid_x.reshape(1, 1, size_x, 1).repeat([b, 1, 1, size_y])
+    grid_x = grid_x.reshape(1, size_x, 1, 1).repeat([b, 1, size_y, 1])
     grid_y = torch.linspace(0, 1, size_y, dtype=torch.float)
-    grid_y = grid_y.reshape(1, 1, 1, size_y).repeat([b, 1, size_x, 1])
-    return torch.cat((grid_x, grid_y), dim=1).to(device)
+    grid_y = grid_y.reshape(1, 1, size_y, 1).repeat([b, size_x, 1, 1])
+    return torch.cat((grid_x, grid_y), dim=-1).to(device)
 
 def get_grid_3d(shape, device):
-    b, _, size_x, size_y, size_z = shape
+    b, size_x, size_y, size_z = shape[:-1]
     grid_x = torch.linspace(0, 1, size_x, dtype=torch.float)
-    grid_x = grid_x.reshape(1, 1, size_x, 1, 1).repeat([b, 1, 1, size_y, size_z])
+    grid_x = grid_x.reshape(1, size_x, 1, 1, 1).repeat([b, 1, size_y, size_z, 1])
     grid_y = torch.linspace(0, 1, size_y, dtype=torch.float)
-    grid_y = grid_y.reshape(1, 1, 1, size_y, 1).repeat([b, 1, size_x, 1, size_z])
+    grid_y = grid_y.reshape(1, 1, size_y, 1, 1).repeat([b, size_x, 1, size_z, 1])
     grid_z = torch.linspace(0, 1, size_z, dtype=torch.float)
-    grid_z = grid_z.reshape(1, 1, 1, 1, size_z).repeat([b, 1, size_x, size_y, 1])
-    return torch.cat((grid_x, grid_y, grid_z), dim=1).to(device)
+    grid_z = grid_z.reshape(1, 1, 1, size_z, 1).repeat([b, size_x, size_y, 1, 1])
+    return torch.cat((grid_x, grid_y, grid_z), dim=-1).to(device)
 
 def default(value, d):
     '''
